@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import ProductList from "../pages/ProductList";
 
 const HomePage: React.FC = () => {
   return (
@@ -31,6 +32,7 @@ const HomePage: React.FC = () => {
       <main style={mainStyle}>
         <h1>Üdvözöljük a Webshopban!</h1>
         <p>Válasszon a fenti menüpontok közül, hogy elkezdje a vásárlást.</p>
+        <ProductList/>
       </main>
     </div>
   );

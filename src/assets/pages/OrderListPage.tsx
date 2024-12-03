@@ -5,47 +5,42 @@ interface Order {
   status: string;
   createdAt: string;
   total: number;
+  billingAddress: Address;
+  shippingAddress: Address;
+}
+
+interface Address {
+  name: string;
+  country: string;
+  city: string;
+  street: string;
+  zip: string;
 }
 
 const OrderListPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/orders", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setOrders(data);
-        } else {
-          setError("Hiba történt a megrendelések betöltése során.");
-        }
-      } catch (err) {
-        setError("Hálózati hiba történt.");
-      }
+      const response = await fetch("/orders.json");
+      const data = await response.json();
+      setOrders(data);
     };
 
     fetchOrders();
   }, []);
 
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-
   return (
     <div>
-      <h1>Megrendeléseim</h1>
-      <ul>
-        {orders.map((order) => (
-          <li key={order.orderId}>
-            <p>Megrendelés ID: {order.orderId}</p>
-            <p>Állapot: {order.status}</p>
-            <p>Összeg: {order.total} Ft</p>
-            <p>Dátum: {new Date(order.createdAt).toLocaleDateString()}</p>
-          </li>
-        ))}
-      </ul>
+      <h1>Megrendelések</h1>
+      {orders.map((order) => (
+        <div key={order.orderId}>
+          <h2>Megrendelés ID: {order.orderId}</h2>
+          <p>Státusz: {order.status}</p>
+          <p>Dátum: {new Date(order.createdAt).toLocaleDateString()}</p>
+          <p>Összesen: {order.total} Ft</p>
+        </div>
+      ))}
     </div>
   );
 };

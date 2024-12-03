@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useGlobalContext } from "../context/GlobalContext";
 
 const LoginPage: React.FC = () => {
-  const { setCurrentUser } = useGlobalContext();
+  const { login } = useGlobalContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -11,42 +11,43 @@ const LoginPage: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
-    try {
-      const response = await fetch("/user.json"); // Felhasználói adatok betöltése
-      const userData = await response.json();
+    if (!email || !password) {
+      setError("Minden mező kitöltése kötelező.");
+      return;
+    }
 
-      if (userData.email === email && userData.password === password) {
-        setCurrentUser(userData); // Beállítjuk a bejelentkezett felhasználót
-        navigate("/profile"); // Navigáció a profil oldalra
-      } else {
-        setError("Hibás e-mail vagy jelszó.");
-      }
-    } catch (err) {
-      setError("Hálózati hiba történt.");
+    const isLoggedIn = await login(email, password);
+    if (isLoggedIn) {
+      navigate("/profile");
+    } else {
+      setError("Helytelen e-mail vagy jelszó.");
     }
   };
 
   return (
     <form onSubmit={handleLogin} style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Belépés</h1>
+      <h1>Bejelentkezés</h1>
       {error && <p style={{ color: "red" }}>{error}</p>}
-      <input
-        type="email"
-        placeholder="E-mail"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Jelszó"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit">Belépés</button>
+      <div>
+        <input
+          type="email"
+          placeholder="E-mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <input
+          type="password"
+          placeholder="Jelszó"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      <button type="submit">Bejelentkezés</button>
     </form>
   );
 };

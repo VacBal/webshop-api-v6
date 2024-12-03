@@ -7,7 +7,7 @@ const NavBar: React.FC = () => {
 
   return (
     <nav>
-      <Link to="/">Főoldal</Link>
+      <Link to="/">Főoldal</Link><br></br>
       <Link to="/cart">
         Kosár ({getCartTotal()})
       </Link>

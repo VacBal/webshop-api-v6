@@ -7,8 +7,9 @@ const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    firstName: "", // Helyes tulajdonságnevek
-    lastName: "",  // Helyes tulajdonságnevek
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
   });
   const [message, setMessage] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -20,16 +21,38 @@ const RegisterPage: React.FC = () => {
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Ellenőrizd, hogy a users tömb-e
+    if (!Array.isArray(users)) {
+      console.error("A users nem tömb.");
+      setMessage("Rendszerhiba történt. Próbáld újra később.");
+      return;
+    }
+
     // Ellenőrizd, hogy az email már létezik-e
     if (users.some((user) => user.email === formData.email)) {
       setMessage("Ez az e-mail cím már regisztrálva van.");
       return;
     }
 
+    // Ellenőrizd a jelszó és megerősítés egyezését
+    if (formData.password !== formData.confirmPassword) {
+      setMessage("A jelszavak nem egyeznek.");
+      return;
+    }
+
+    // Ellenőrizd a jelszó erősségét
+    if (formData.password.length < 8) {
+      setMessage("A jelszónak legalább 8 karakter hosszúnak kell lennie.");
+      return;
+    }
+
     // Új felhasználó létrehozása
     const newUser = {
-      ...formData,
       userId: Math.random().toString(36).substr(2, 9),
+      email: formData.email,
+      password: formData.password,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       shippingAddress: {
         name: `${formData.firstName} ${formData.lastName}`,
         country: "",
@@ -50,8 +73,10 @@ const RegisterPage: React.FC = () => {
 
     setUsers([...users, newUser]); // Új felhasználó hozzáadása
     setMessage("Sikeres regisztráció!");
-    setFormData({ email: "", password: "", firstName: "", lastName: "" }); // Állapot visszaállítása
-    setTimeout(() => navigate("/login"), 2000); // Navigáció a belépési oldalra
+    setFormData({ email: "", password: "", confirmPassword: "", firstName: "", lastName: "" });
+
+    // Navigáció a belépési oldalra
+    setTimeout(() => navigate("/login"), 2000);
   };
 
   return (
@@ -74,6 +99,16 @@ const RegisterPage: React.FC = () => {
           name="password"
           placeholder="Jelszó"
           value={formData.password}
+          onChange={handleInputChange}
+          required
+        />
+      </div>
+      <div>
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder="Jelszó megerősítése"
+          value={formData.confirmPassword}
           onChange={handleInputChange}
           required
         />

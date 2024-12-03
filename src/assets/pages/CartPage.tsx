@@ -1,45 +1,22 @@
-import React, { useEffect, useState } from "react";
-
-interface CartItem {
-  id: string;
-  quantity: number;
-}
+import React from "react";
+import { useGlobalContext } from "../context/GlobalContext";
 
 const CartPage: React.FC = () => {
-  const [cart, setCart] = useState<CartItem[]>([]);
-
-  useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  }, []);
-
-  const addToCart = (id: string) => {
-    const updatedCart = [...cart];
-    const itemIndex = updatedCart.findIndex((item) => item.id === id);
-
-    if (itemIndex > -1) {
-      updatedCart[itemIndex].quantity += 1;
-    } else {
-      updatedCart.push({ id, quantity: 1 });
-    }
-
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
-  };
+  const { cart } = useGlobalContext();
 
   return (
     <div>
       <h1>Kosár</h1>
-      <ul>
-        {cart.map((item) => (
-          <li key={item.id}>
-            Termék ID: {item.id}, Mennyiség: {item.quantity}
-          </li>
-        ))}
-      </ul>
-      <button onClick={() => addToCart("product1")}>Termék 1 hozzáadása</button>
+      {cart.length > 0 ? (
+        cart.map((item) => (
+          <div key={item.productId}>
+            <p>Termék ID: {item.productId}</p>
+            <p>Mennyiség: {item.quantity}</p>
+          </div>
+        ))
+      ) : (
+        <p>A kosár üres.</p>
+      )}
     </div>
   );
 };

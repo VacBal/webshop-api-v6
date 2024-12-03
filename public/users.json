@@ -1,16 +1,23 @@
-[
-    {
-      "email": "admin@example.com",
-      "password": "password123",
-      "firstname": "Admin",
-      "lastname": "User"
-    }
-    ,
-    {
-      "email": "teszt@example.com",
-      "password": "teszt1",
-      "firstname": "Teszt1",
-      "lastname": "Teszt"
-    }
-  ]
-  
+{
+  "userId": "c3621d67-c304-41ad-b965-907f74d46bf2",
+  "email": "numbuh1@knd.com",
+  "password": "password123",
+  "firstName": "Nigel",
+  "lastName": "Uno",
+  "shippingAddress": {
+    "name": "Nigel Uno",
+    "country": "United States of America",
+    "city": "Washington D.C.",
+    "street": "1600 Pennsylvania Avenue NW",
+    "zip": "20500",
+    "phoneNumber": "+36201234567"
+  },
+  "billingAddress": {
+    "name": "Nigel Uno",
+    "country": "United States of America",
+    "city": "Washington D.C.",
+    "street": "1600 Pennsylvania Avenue NW",
+    "zip": "20500",
+    "taxNumber": "12345678911"
+  }
+}

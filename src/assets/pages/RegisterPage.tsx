@@ -1,13 +1,17 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useGlobalContext } from "../context/GlobalContext";
 
 const RegisterPage: React.FC = () => {
+  const { users, setUsers } = useGlobalContext();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    firstname: "",
-    lastname: "",
+    firstName: "", // Helyes tulajdonságnevek
+    lastName: "",  // Helyes tulajdonságnevek
   });
   const [message, setMessage] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,26 +20,38 @@ const RegisterPage: React.FC = () => {
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Ellenőrizd, hogy a localStorage-ban van-e már "users" kulcs
-    const storedUsers = localStorage.getItem("users");
-    const users = storedUsers ? JSON.parse(storedUsers) : [];
-
-    // Ellenőrizzük, hogy az email már létezik-e
-    const emailExists = users.some((user: any) => user.email === formData.email);
-    if (emailExists) {
+    // Ellenőrizd, hogy az email már létezik-e
+    if (users.some((user) => user.email === formData.email)) {
       setMessage("Ez az e-mail cím már regisztrálva van.");
       return;
     }
 
-    // Új felhasználó hozzáadása
-    users.push(formData);
+    // Új felhasználó létrehozása
+    const newUser = {
+      ...formData,
+      userId: Math.random().toString(36).substr(2, 9),
+      shippingAddress: {
+        name: `${formData.firstName} ${formData.lastName}`,
+        country: "",
+        city: "",
+        street: "",
+        zip: "",
+        phoneNumber: "",
+      },
+      billingAddress: {
+        name: `${formData.firstName} ${formData.lastName}`,
+        country: "",
+        city: "",
+        street: "",
+        zip: "",
+        taxNumber: "",
+      },
+    };
 
-    // Mentés a localStorage-ba
-    localStorage.setItem("users", JSON.stringify(users));
-
-    // Üzenet és űrlap alaphelyzetbe állítása
+    setUsers([...users, newUser]); // Új felhasználó hozzáadása
     setMessage("Sikeres regisztráció!");
-    setFormData({ email: "", password: "", firstname: "", lastname: "" });
+    setFormData({ email: "", password: "", firstName: "", lastName: "" }); // Állapot visszaállítása
+    setTimeout(() => navigate("/login"), 2000); // Navigáció a belépési oldalra
   };
 
   return (
@@ -50,7 +66,6 @@ const RegisterPage: React.FC = () => {
           value={formData.email}
           onChange={handleInputChange}
           required
-          style={inputStyle}
         />
       </div>
       <div>
@@ -61,54 +76,31 @@ const RegisterPage: React.FC = () => {
           value={formData.password}
           onChange={handleInputChange}
           required
-          style={inputStyle}
         />
       </div>
       <div>
         <input
           type="text"
-          name="firstname"
+          name="firstName"
           placeholder="Keresztnév"
-          value={formData.firstname}
+          value={formData.firstName}
           onChange={handleInputChange}
           required
-          style={inputStyle}
         />
       </div>
       <div>
         <input
           type="text"
-          name="lastname"
+          name="lastName"
           placeholder="Vezetéknév"
-          value={formData.lastname}
+          value={formData.lastName}
           onChange={handleInputChange}
           required
-          style={inputStyle}
         />
       </div>
-      <button type="submit" style={buttonStyle}>
-        Regisztráció
-      </button>
+      <button type="submit">Regisztráció</button>
     </form>
   );
-};
-
-// Stílusok
-const inputStyle = {
-  width: "250px",
-  padding: "10px",
-  margin: "5px",
-  borderRadius: "5px",
-  border: "1px solid #ccc",
-};
-
-const buttonStyle = {
-  padding: "10px 20px",
-  backgroundColor: "#007bff",
-  color: "#fff",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
 };
 
 export default RegisterPage;

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "computers",
+    "name": "Számítógépek",
+    "image": "https://example.com/computers.jpg",
+    "productCount": 20
+  },
+  {
+    "id": "phones",
+    "name": "Mobiltelefonok",
+    "image": "https://example.com/phones.jpg",
+    "productCount": 15
+  }
+]

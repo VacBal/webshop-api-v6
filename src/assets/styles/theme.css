@@ -1,0 +1,59 @@
+:root {
+    /* Alapszínek */
+    --color-primary: #007bff;
+    --color-primary-hover: #0056b3;
+    --color-secondary: #6c757d;
+    --color-success: #28a745;
+    --color-danger: #dc3545;
+    --color-warning: #ffc107;
+    --color-info: #17a2b8;
+    --color-light: #f8f9fa;
+    --color-dark: #343a40;
+  
+    /* Háttérszínek */
+    --background-light: #ffffff;
+    --background-dark: #343a40;
+  
+    /* Szövegszínek */
+    --text-light: #f8f9fa;
+    --text-dark: #343a40;
+  
+    /* Határszínek */
+    --border-light: #dee2e6;
+    --border-dark: #495057;
+  }
+  
+  body {
+    background-color: var(--background-light);
+    color: var(--text-dark);
+  }
+  
+  .dark-mode {
+    background-color: var(--background-dark);
+    color: var(--text-light);
+  }
+  
+  button {
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    border: 1px solid var(--border-light);
+  }
+  
+  button:hover {
+    background-color: var(--color-primary-hover);
+  }
+  
+  .alert-success {
+    background-color: var(--color-success);
+    color: var(--text-light);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .alert-danger {
+    background-color: var(--color-danger);
+    color: var(--text-light);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  

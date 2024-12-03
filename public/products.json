@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "name": "Laptop A",
+    "price": 300000,
+    "image": "https://example.com/laptop-a.jpg",
+    "rating": 4,
+    "stock": 5,
+    "category": "computers"
+  },
+  {
+    "id": "2",
+    "name": "Mobiltelefon B",
+    "price": 150000,
+    "image": "https://example.com/phone-b.jpg",
+    "rating": 5,
+    "stock": 10,
+    "category": "phones"
+  }
+]

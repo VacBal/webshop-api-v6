@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-// Felhasználói típus
+// Import JSON files
+import usersData from "../data/users.json";
+import productsData from "../data/products.json"; // Ensure this matches the actual file structure
+
+// Define the User interface
 interface User {
   userId: string;
   email: string;
@@ -25,13 +29,21 @@ interface User {
   };
 }
 
-// Kosár elem típus
+// Define the CartItem interface
 interface CartItem {
   productId: string;
   quantity: number;
 }
 
-// Globális kontextus tulajdonságai
+// Define the Product interface
+interface Product {
+  productId: string; // Ensure this matches the key in productsData
+  name: string;
+  price: number;
+  stock: number;
+}
+
+// Update GlobalContextProps
 interface GlobalContextProps {
   users: User[];
   setUsers: React.Dispatch<React.SetStateAction<User[]>>;
@@ -39,26 +51,33 @@ interface GlobalContextProps {
   currentUser: User | null;
   setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
   cart: CartItem[];
-  addToCart: (productId: string, quantity: number, maxStock: number) => void; // Frissített típus
+  addToCart: (productId: string, quantity: number, maxStock: number) => void;
   getCartItemQuantity: (productId: string) => number;
   getCartTotal: () => number;
   clearCart: () => void;
   login: (email: string, password: string) => boolean;
   logout: () => void;
+  products: Product[]; // Add products to the context
 }
 
-// Kontextus inicializálása
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
 
 export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>(usersData); // Load users from JSON
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [cart, setCart] = useState<CartItem[]>(() => {
     const savedCart = localStorage.getItem("cart");
     return savedCart ? JSON.parse(savedCart) : [];
   });
+  const [products, setProducts] = useState<Product[]>(
+    productsData.map((product) => ({
+      productId: product.id, // Map 'id' to 'productId'
+      name: product.name,
+      price: product.price,
+      stock: product.stock,
+    }))
+  );
 
-  // Kosár állapot mentése
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
@@ -85,7 +104,6 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.productId === productId);
       if (existingItem) {
-        // Frissítsük az elemet a maximális készlet figyelembevételével
         const updatedCart = prevCart.map((item) =>
           item.productId === productId
             ? { ...item, quantity: Math.min(item.quantity + quantity, maxStock) }
@@ -93,7 +111,6 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         );
         return updatedCart;
       }
-      // Új elem hozzáadása
       return [...prevCart, { productId, quantity: Math.min(quantity, maxStock) }];
     });
   };
@@ -126,6 +143,7 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         clearCart,
         login,
         logout,
+        products, // Provide products to the context
       }}
     >
       {children}

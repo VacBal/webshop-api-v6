@@ -1,0 +1,20 @@
+[
+  {
+    "id": "computers-tablets",
+    "name": "Computers & Tablets",
+    "image": "https://picsum.photos/400/400?random=1",
+    "productCount": 1
+  },
+  {
+    "id": "cameras-photo",
+    "name": "Cameras & Photo",
+    "image": "https://picsum.photos/400/400?random=2",
+    "productCount": 2
+  },
+  {
+    "id": "tv-audio-surveillance",
+    "name": "TV, Audio & Surveillance",
+    "image": "https://picsum.photos/400/400?random=3",
+    "productCount": 1
+  }
+]

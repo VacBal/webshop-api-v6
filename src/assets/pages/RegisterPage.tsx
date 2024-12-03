@@ -23,7 +23,7 @@ const RegisterPage: React.FC = () => {
 
     // Ellenőrizd, hogy a users tömb-e
     if (!Array.isArray(users)) {
-      console.error("A users nem tömb.");
+      console.error("A users állapot nem tömb.");
       setMessage("Rendszerhiba történt. Próbáld újra később.");
       return;
     }

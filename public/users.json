@@ -1,23 +1,48 @@
-{
-  "userId": "c3621d67-c304-41ad-b965-907f74d46bf2",
-  "email": "numbuh1@knd.com",
-  "password": "password123",
-  "firstName": "Nigel",
-  "lastName": "Uno",
-  "shippingAddress": {
-    "name": "Nigel Uno",
-    "country": "United States of America",
-    "city": "Washington D.C.",
-    "street": "1600 Pennsylvania Avenue NW",
-    "zip": "20500",
-    "phoneNumber": "+36201234567"
+[
+  {
+    "userId": "1",
+    "email": "john.doe@example.com",
+    "password": "securepassword123",
+    "firstName": "John",
+    "lastName": "Doe",
+    "shippingAddress": {
+      "name": "John Doe",
+      "country": "USA",
+      "city": "New York",
+      "street": "123 Main St",
+      "zip": "10001",
+      "phoneNumber": "+1234567890"
+    },
+    "billingAddress": {
+      "name": "John Doe",
+      "country": "USA",
+      "city": "New York",
+      "street": "123 Main St",
+      "zip": "10001",
+      "taxNumber": "123456789"
+    }
   },
-  "billingAddress": {
-    "name": "Nigel Uno",
-    "country": "United States of America",
-    "city": "Washington D.C.",
-    "street": "1600 Pennsylvania Avenue NW",
-    "zip": "20500",
-    "taxNumber": "12345678911"
+  {
+    "userId": "2",
+    "email": "jane.smith@example.com",
+    "password": "mypassword456",
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "shippingAddress": {
+      "name": "Jane Smith",
+      "country": "UK",
+      "city": "London",
+      "street": "45 Oxford St",
+      "zip": "W1D 2LT",
+      "phoneNumber": "+442079876543"
+    },
+    "billingAddress": {
+      "name": "Jane Smith",
+      "country": "UK",
+      "city": "London",
+      "street": "45 Oxford St",
+      "zip": "W1D 2LT",
+      "taxNumber": "987654321"
+    }
   }
-}
+]

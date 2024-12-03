@@ -39,7 +39,7 @@ interface GlobalContextProps {
   currentUser: User | null;
   setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
   cart: CartItem[];
-  addToCart: (productId: string, quantity: number) => void;
+  addToCart: (productId: string, quantity: number, maxStock: number) => void; // Frissített típus
   getCartItemQuantity: (productId: string) => number;
   getCartTotal: () => number;
   clearCart: () => void;

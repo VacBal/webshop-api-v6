@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useGlobalContext } from "../context/GlobalContext";
 
 const RegisterPage: React.FC = () => {
-  const { users, addUser } = useGlobalContext();
+  const { addUser } = useGlobalContext();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -20,11 +20,6 @@ const RegisterPage: React.FC = () => {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (users.some((user) => user.email === formData.email)) {
-      setMessage("Ez az e-mail cím már regisztrálva van.");
-      return;
-    }
 
     if (formData.password !== formData.confirmPassword) {
       setMessage("A jelszavak nem egyeznek.");
@@ -57,64 +52,26 @@ const RegisterPage: React.FC = () => {
 
     addUser(newUser);
     setMessage("Sikeres regisztráció!");
-    setFormData({ email: "", password: "", confirmPassword: "", firstName: "", lastName: "" });
+    setFormData({
+      email: "",
+      password: "",
+      confirmPassword: "",
+      firstName: "",
+      lastName: "",
+    });
+
     setTimeout(() => navigate("/login"), 2000);
   };
 
   return (
-    <form onSubmit={handleRegister} style={{ textAlign: "center", marginTop: "50px" }}>
+    <form onSubmit={handleRegister}>
       <h1>Regisztráció</h1>
-      {message && <p style={{ color: message.includes("Sikeres") ? "green" : "red" }}>{message}</p>}
-      <div>
-        <input
-          type="email"
-          name="email"
-          placeholder="E-mail"
-          value={formData.email}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-      <div>
-        <input
-          type="password"
-          name="password"
-          placeholder="Jelszó"
-          value={formData.password}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-      <div>
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Jelszó megerősítése"
-          value={formData.confirmPassword}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-      <div>
-        <input
-          type="text"
-          name="firstName"
-          placeholder="Keresztnév"
-          value={formData.firstName}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-      <div>
-        <input
-          type="text"
-          name="lastName"
-          placeholder="Vezetéknév"
-          value={formData.lastName}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
+      {message && <p>{message}</p>}
+      <input type="email" name="email" onChange={handleInputChange} required />
+      <input type="password" name="password" onChange={handleInputChange} required />
+      <input type="password" name="confirmPassword" onChange={handleInputChange} required />
+      <input type="text" name="firstName" onChange={handleInputChange} required />
+      <input type="text" name="lastName" onChange={handleInputChange} required />
       <button type="submit">Regisztráció</button>
     </form>
   );

@@ -55,11 +55,12 @@ const EditProfilePage: React.FC = () => {
     if (isNested) {
       setFormData((prev) => ({
         ...prev,
-        [section]: {
-          ...prev[section as keyof typeof formData],
+        [section as keyof typeof formData]: {
+          ...(prev[section as keyof typeof formData] as Record<string, string>), // Explicit típus
           [field]: e.target.value,
         },
       }));
+      
     } else {
       setFormData({ ...formData, [field]: e.target.value });
     }

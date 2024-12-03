@@ -1,30 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useGlobalContext } from "../context/GlobalContext";
+import AddToCart from "../pages/AddToCart";
 
 const ProductList: React.FC = () => {
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const response = await fetch("/products.json");
-      const data = await response.json();
-      setProducts(data);
-    };
-
-    fetchProducts();
-  }, []);
+  const products = [
+    { id: "1", name: "Laptop", stock: 5 },
+    { id: "2", name: "Telefon", stock: 3 },
+  ];
 
   return (
     <div>
-      <h1>Termékek</h1>
-      <ul>
-        {products.map((product: any) => (
-          <li key={product.id}>
-            <img src={product.image} alt={product.name} />
-            <p>{product.name}</p>
-            <p>Ár: {product.price} Ft</p>
-          </li>
-        ))}
-      </ul>
+      {products.map((product) => (
+        <div key={product.id}>
+          <h3>{product.name}</h3>
+          <AddToCart productId={product.id} stock={product.stock} />
+        </div>
+      ))}
     </div>
   );
 };

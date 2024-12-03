@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-// Felhasználó típus
+// Felhasználói típus
 interface User {
   userId: string;
   email: string;
@@ -21,7 +21,7 @@ interface User {
     city: string;
     street: string;
     zip: string;
-    taxNumber: string;
+    taxNumber?: string;
   };
 }
 
@@ -31,46 +31,44 @@ interface CartItem {
   quantity: number;
 }
 
-// Globális kontextus típus
+// Globális kontextus tulajdonságai
 interface GlobalContextProps {
-  currentUser: User | null;
-  setCurrentUser: Dispatch<SetStateAction<User | null>>;
   users: User[];
-  setUsers: Dispatch<SetStateAction<User[]>>;
+  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+  addUser: (user: User) => void;
+  currentUser: User | null;
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
   cart: CartItem[];
   addToCart: (productId: string, quantity: number) => void;
-  removeFromCart: (productId: string) => void;
+  getCartItemQuantity: (productId: string) => number;
+  getCartTotal: () => number;
+  clearCart: () => void;
   login: (email: string, password: string) => boolean;
   logout: () => void;
 }
 
-// Globális kontextus inicializálása
+// Kontextus inicializálása
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
 
-// Globális provider komponens
 export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    const savedCart = localStorage.getItem("cart");
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
 
-  // Alapértelmezett felhasználók betöltése JSON fájlból
+  // Kosár állapot mentése
   useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const response = await fetch("/path/to/users.json");
-        const data: User[] = await response.json();
-        setUsers(data);
-      } catch (error) {
-        console.error("Hiba a felhasználók betöltésekor:", error);
-      }
-    };
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
 
-    loadUsers();
-  }, []);
+  const addUser = (user: User) => {
+    setUsers((prev) => [...prev, user]);
+  };
 
-  // Felhasználó beléptetése
   const login = (email: string, password: string): boolean => {
-    const user = users.find((u) => u.email === email && u.password === password);
+    const user = users.find((user) => user.email === email && user.password === password);
     if (user) {
       setCurrentUser(user);
       return true;
@@ -78,41 +76,54 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return false;
   };
 
-  // Felhasználó kijelentkeztetése
   const logout = () => {
     setCurrentUser(null);
+    clearCart();
   };
 
-  // Kosárhoz hozzáadás
-  const addToCart = (productId: string, quantity: number) => {
-    setCart((prev) => {
-      const existingItem = prev.find((item) => item.productId === productId);
+  const addToCart = (productId: string, quantity: number, maxStock: number) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.productId === productId);
       if (existingItem) {
-        return prev.map((item) =>
+        // Frissítsük az elemet a maximális készlet figyelembevételével
+        const updatedCart = prevCart.map((item) =>
           item.productId === productId
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: Math.min(item.quantity + quantity, maxStock) }
             : item
         );
+        return updatedCart;
       }
-      return [...prev, { productId, quantity }];
+      // Új elem hozzáadása
+      return [...prevCart, { productId, quantity: Math.min(quantity, maxStock) }];
     });
   };
 
-  // Kosárból eltávolítás
-  const removeFromCart = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.productId !== productId));
+  const getCartItemQuantity = (productId: string): number => {
+    const item = cart.find((item) => item.productId === productId);
+    return item ? item.quantity : 0;
+  };
+
+  const getCartTotal = (): number => {
+    return cart.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const clearCart = () => {
+    setCart([]);
   };
 
   return (
     <GlobalContext.Provider
       value={{
-        currentUser,
-        setCurrentUser,
         users,
         setUsers,
+        addUser,
+        currentUser,
+        setCurrentUser,
         cart,
         addToCart,
-        removeFromCart,
+        getCartItemQuantity,
+        getCartTotal,
+        clearCart,
         login,
         logout,
       }}
@@ -122,8 +133,7 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   );
 };
 
-// Kontextus használata
-export const useGlobalContext = () => {
+export const useGlobalContext = (): GlobalContextProps => {
   const context = useContext(GlobalContext);
   if (!context) {
     throw new Error("useGlobalContext must be used within a GlobalProvider");

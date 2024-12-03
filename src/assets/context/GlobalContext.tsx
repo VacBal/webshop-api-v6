@@ -1,6 +1,6 @@
-import React, { createContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from "react";
 
-// Interfészek
+// Felhasználó típus
 interface User {
   userId: string;
   email: string;
@@ -25,92 +25,96 @@ interface User {
   };
 }
 
+// Kosár elem típus
 interface CartItem {
   productId: string;
   quantity: number;
 }
 
+// Globális kontextus típus
 interface GlobalContextProps {
   currentUser: User | null;
-  users: User[];
-  cart: CartItem[];
   setCurrentUser: Dispatch<SetStateAction<User | null>>;
-  addUser: (user: User) => void;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  users: User[];
+  setUsers: Dispatch<SetStateAction<User[]>>;
+  cart: CartItem[];
   addToCart: (productId: string, quantity: number) => void;
   removeFromCart: (productId: string) => void;
+  login: (email: string, password: string) => boolean;
+  logout: () => void;
 }
 
-// Kontextus létrehozása
+// Globális kontextus inicializálása
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
 
+// Globális provider komponens
 export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  // Felhasználók betöltése a JSON fájlból
+  // Alapértelmezett felhasználók betöltése JSON fájlból
   useEffect(() => {
-    const fetchUsers = async () => {
+    const loadUsers = async () => {
       try {
-        const response = await fetch("/users.json");
-        const data = await response.json();
+        const response = await fetch("/path/to/users.json");
+        const data: User[] = await response.json();
         setUsers(data);
       } catch (error) {
         console.error("Hiba a felhasználók betöltésekor:", error);
       }
     };
-    fetchUsers();
+
+    loadUsers();
   }, []);
 
-  const addUser = (user: User) => {
-    setUsers((prev) => [...prev, user]);
-  };
-
-  const login = async (email: string, password: string) => {
-    const user = users.find((user) => user.email === email && user.password === password);
+  // Felhasználó beléptetése
+  const login = (email: string, password: string): boolean => {
+    const user = users.find((u) => u.email === email && u.password === password);
     if (user) {
       setCurrentUser(user);
-      localStorage.setItem("authToken", "fake-jwt-token");
       return true;
     }
     return false;
   };
 
+  // Felhasználó kijelentkeztetése
   const logout = () => {
     setCurrentUser(null);
-    localStorage.removeItem("authToken");
   };
 
+  // Kosárhoz hozzáadás
   const addToCart = (productId: string, quantity: number) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.productId === productId);
+    setCart((prev) => {
+      const existingItem = prev.find((item) => item.productId === productId);
       if (existingItem) {
-        return prevCart.map((item) =>
-          item.productId === productId ? { ...item, quantity: item.quantity + quantity } : item
+        return prev.map((item) =>
+          item.productId === productId
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
         );
       }
-      return [...prevCart, { productId, quantity }];
+      return [...prev, { productId, quantity }];
     });
   };
 
+  // Kosárból eltávolítás
   const removeFromCart = (productId: string) => {
-    setCart((prevCart) => prevCart.filter((item) => item.productId !== productId));
+    setCart((prev) => prev.filter((item) => item.productId !== productId));
   };
 
   return (
     <GlobalContext.Provider
       value={{
         currentUser,
-        users,
-        cart,
         setCurrentUser,
-        addUser,
-        login,
-        logout,
+        users,
+        setUsers,
+        cart,
         addToCart,
         removeFromCart,
+        login,
+        logout,
       }}
     >
       {children}
@@ -118,8 +122,9 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   );
 };
 
+// Kontextus használata
 export const useGlobalContext = () => {
-  const context = React.useContext(GlobalContext);
+  const context = useContext(GlobalContext);
   if (!context) {
     throw new Error("useGlobalContext must be used within a GlobalProvider");
   }

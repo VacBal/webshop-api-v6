@@ -9,6 +9,7 @@ interface Product {
   description: string;
   stock: number;
   image: string;
+  categories:string;
 }
 
 const ProductListPage = () => {
@@ -56,6 +57,7 @@ const ProductListPage = () => {
             <p>{product.description}</p>
             <p>Darab: {product.stock}</p>
             <p>Ár: {product.price} Ft</p>
+            <p>Kategória: {product.categories}</p>
             <button onClick={() => handleAddToCart(product)}>Kosárba</button>
           </div>
         ))}

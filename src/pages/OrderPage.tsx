@@ -111,7 +111,7 @@ const OrderPage = () => {
       alert('Megrendelés sikeresen leadva!');
       clearCart();
       setComment('');
-      window.location.href = '/thank-you';
+      window.location.href = '/';
     } catch (err) {
       console.error('Hiba a megrendelés mentésekor:', err);
       setError('Nem sikerült menteni a megrendelést.');

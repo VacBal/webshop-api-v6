@@ -2,7 +2,10 @@ import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 interface User {
   email: string;
-  name: string;
+  firstName:string;
+  lastName:string;
+  shippingAddress:string;
+  billingAddress:string;
 }
 
 interface AuthContextProps {
@@ -26,8 +29,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('users');
+    setUser(null); // Törli a kontextusból a felhasználót
+    localStorage.removeItem('authToken'); // Törli a helyi tárolt tokent
   };
 
   return (

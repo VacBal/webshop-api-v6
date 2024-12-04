@@ -9,6 +9,7 @@ import OrderPage from './pages/OrderPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
+import EditProfilePage from "./pages/EditProfilePage";
 
 const App: React.FC = () => {
   return (
@@ -23,7 +24,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/registracion" element={<RegisterPage />} />
-            
+            <Route path="/edit-profile" element={<EditProfilePage />} />
           </Routes>
         </CartProvider>
       </AuthProvider>

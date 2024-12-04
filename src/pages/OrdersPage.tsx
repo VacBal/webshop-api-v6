@@ -1,25 +1,41 @@
-
-import React, { useEffect, useState } from 'react';
-
-interface CartItem {
-  productId: string;
-  quantity: number;
-}
+import React, { useState, useEffect } from 'react';
 
 interface Order {
   orderId: string;
-  userId: string;
-  items: { productId: string; quantity: number }[];
   status: string;
+  comment: string;
+  billingAddress: Address;
+  shippingAddress: Address;
+  items: { product: Product; quantity: number }[];
+  total: number;
+}
+
+interface Address {
+  name: string;
+  country: string;
+  city: string;
+  street: string;
+  zip: string;
+  phoneNumber?: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  image: string;
+  price: number;
+  rating: number;
+  categories: string[];
+  stock: number;
 }
 
 const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reason, setReason] = useState('');
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  // Betöltjük az előző rendelések és a kosár tartalmát
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -27,12 +43,6 @@ const OrdersPage = () => {
         if (!response.ok) throw new Error('Hiba történt a rendelések betöltésekor.');
         const data = await response.json();
         setOrders(data);
-
-        // Kosár betöltése a localStorage-ból
-        const savedCart = localStorage.getItem('cart');
-        if (savedCart) {
-          setCart(JSON.parse(savedCart));
-        }
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -47,27 +57,41 @@ const OrdersPage = () => {
     fetchOrders();
   }, []);
 
-  const handlePlaceOrder = () => {
-    if (cart.length === 0) {
-      alert('A kosár üres. Kérlek, adj hozzá termékeket a rendeléshez!');
+  const handleCancelOrder = async (orderId: string) => {
+    if (!reason) {
+      alert('Az indoklás megadása kötelező!');
       return;
     }
 
-    const newOrder: Order = {
-      orderId: `${Date.now()}`, // Egyedi rendelés ID generálása
-      userId: '12345', // Példa felhasználó azonosító
-      items: cart,
-      status: 'new',
-    };
+    try {
+      const response = await fetch(`/data/orders/${orderId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason }),
+      });
 
-    // Új rendelés hozzáadása a meglévő rendeléseinkhez
-    setOrders((prevOrders) => [...prevOrders, newOrder]);
+      if (!response.ok) {
+        throw new Error('Hiba történt a megrendelés visszamondása során.');
+      }
 
-    // Kosár kiürítése
-    setCart([]);
-    localStorage.removeItem('cart');
-
-    alert('A rendelés sikeresen leadva!');
+      const updatedOrder = await response.json();
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.orderId === updatedOrder.orderId ? updatedOrder : order
+        )
+      );
+      setReason('');
+      setSelectedOrderId(null);
+      alert('A megrendelés sikeresen visszamondva.');
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Ismeretlen hiba történt.');
+      }
+    }
   };
 
   if (loading) return <p>Betöltés...</p>;
@@ -75,40 +99,32 @@ const OrdersPage = () => {
 
   return (
     <div>
-      <h1>Rendelések</h1>
+      <h1>Rendeléseim</h1>
       <ul>
         {orders.map((order) => (
           <li key={order.orderId}>
-            Rendelés ID: {order.orderId} - Státusz: {order.status}
+            <h3>Rendelés ID: {order.orderId}</h3>
+            <p>Státusz: {order.status}</p>
+            <p>Összesen: {order.total} Ft</p>
+            {order.status === 'new' && (
+              <button onClick={() => setSelectedOrderId(order.orderId)}>Visszamondás</button>
+            )}
           </li>
         ))}
       </ul>
-      <h2>Kosár tartalma</h2>
-      {cart.length === 0 ? (
-        <p>A kosár üres.</p>
-      ) : (
-        <ul>
-          {cart.map((item) => (
-            <li key={item.productId}>
-              Termék ID: {item.productId} - Mennyiség: {item.quantity}
-            </li>
-          ))}
-        </ul>
+      {selectedOrderId && (
+        <div>
+          <h2>Megrendelés visszamondása</h2>
+          <p>Rendelés ID: {selectedOrderId}</p>
+          <textarea
+            placeholder="Adja meg az indoklást"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+          <button onClick={() => handleCancelOrder(selectedOrderId)}>Megerősítés</button>
+          <button onClick={() => setSelectedOrderId(null)}>Mégsem</button>
+        </div>
       )}
-      <button
-        onClick={handlePlaceOrder}
-        style={{
-          padding: '10px 20px',
-          backgroundColor: '#007bff',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          marginTop: '20px',
-        }}
-      >
-        Rendelés leadása
-      </button>
     </div>
   );
 };

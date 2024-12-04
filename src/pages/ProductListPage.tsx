@@ -1,40 +1,35 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import NavBar from '../components/NavBar';
 
 interface Product {
   id: string;
   name: string;
-  description: string;
   price: number;
-  image: string;
+  description: string;
   stock: number;
+  image: string;
+  categories: string[];
 }
 
-interface CartItem {
-  productId: string;
-  quantity: number;
-}
-
-const ProductListPage: React.FC = () => {
+const ProductListPage = () => {
+  const { categoryId } = useParams<{ categoryId: string }>(); // Kategória ID paraméter
   const [products, setProducts] = useState<Product[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { addToCart } = useCart();
 
   useEffect(() => {
-    // Betöltéskor kosár inicializálása localStorage-ból
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-
     const fetchProducts = async () => {
       try {
-        const response = await fetch('/data/products.json');
-        if (!response.ok) {
-          throw new Error('Hiba történt a termékek betöltésekor.');
-        }
-        const data = await response.json();
-        setProducts(data);
+        const response = await fetch('/data/products.json'); // Termékek betöltése
+        if (!response.ok) throw new Error('Hiba történt a termékek betöltésekor.');
+        const data: Product[] = await response.json();
+        const filteredProducts = data.filter((product) =>
+          product.categories.includes(categoryId!)
+        ); // Csak a kategóriához tartozó termékek
+        setProducts(filteredProducts);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -47,27 +42,10 @@ const ProductListPage: React.FC = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [categoryId]);
 
-  const handleAddToCart = (productId: string) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.productId === productId);
-      let updatedCart;
-
-      if (existingItem) {
-        updatedCart = prevCart.map((item) =>
-          item.productId === productId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        updatedCart = [...prevCart, { productId, quantity: 1 }];
-      }
-
-      // Kosár frissítése localStorage-ban
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      return updatedCart;
-    });
+  const handleAddToCart = (product: Product) => {
+    addToCart({ productId: product.id, name: product.name, price: product.price, quantity: 1 });
   };
 
   if (loading) return <p>Betöltés...</p>;
@@ -76,43 +54,16 @@ const ProductListPage: React.FC = () => {
   return (
     <div>
       <h1>Terméklista</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+      <div>
         {products.map((product) => (
-          <div
-            key={product.id}
-            style={{
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              padding: '16px',
-              textAlign: 'center',
-            }}
-          >
-            <img
-              src={product.image}
-              alt={product.name}
-              style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '8px' }}
-            />
-            <h2>{product.name}</h2>
+          <div key={product.id}>
+            <h3>{product.name}</h3>
+            <img src={product.image} alt={product.name} style={{ width: '200px' }} />
             <p>{product.description}</p>
-            <p><strong>Ár:</strong> {product.price} Ft</p>
-            <p>
-              <strong>Raktárkészlet:</strong>{' '}
-              {product.stock > 0 ? `${product.stock} db` : 'Nincs raktáron'}
-            </p>
-            <button
-              style={{
-                padding: '8px 16px',
-                backgroundColor: product.stock > 0 ? '#007bff' : '#ccc',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: product.stock > 0 ? 'pointer' : 'not-allowed',
-              }}
-              disabled={product.stock === 0}
-              onClick={() => handleAddToCart(product.id)}
-            >
-              Kosárba
-            </button>
+            <p>Ár: {product.price} Ft</p>
+            
+          
+            <button onClick={() => handleAddToCart(product)}>Kosárba</button>
           </div>
         ))}
       </div>

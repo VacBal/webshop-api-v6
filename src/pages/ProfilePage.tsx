@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Address {
   name: string;
@@ -6,6 +7,8 @@ interface Address {
   city: string;
   street: string;
   zip: string;
+  phoneNumber?: string;
+  taxNumber?: string;
 }
 
 interface UserProfile {
@@ -21,37 +24,44 @@ const ProfilePage = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-
-  const userId = '1'; // Például: bejelentkezett felhasználó ID-ja
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch('/data/users.json');
-        if (!response.ok) throw new Error('Hiba történt a felhasználói profil betöltésekor.');
-        const users = await response.json();
-        const userProfile = users.find((user: UserProfile) => user.userId === userId);
-        if (!userProfile) throw new Error('Felhasználói profil nem található.');
-        setProfile(userProfile);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('Ismeretlen hiba történt.');
+        // Ellenőrizzük, hogy van-e tárolt token
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          throw new Error('Nincs érvényes token.');
         }
+
+        // Helyi `users.json` betöltése és szűrése
+        const response = await fetch('/data/users.json');
+        if (!response.ok) throw new Error('Hiba történt a felhasználói adatok lekérésekor.');
+        const users: UserProfile[] = await response.json();
+        
+        // Példa: Az aktuális felhasználót a token alapján szűrjük
+        const user = users.find((user) => user.userId === token);
+        if (!user) {
+          throw new Error('Felhasználói profil nem található.');
+        }
+
+        setProfile(user);
+      } catch (err) {
+        console.error(err);
+        localStorage.removeItem('authToken'); // Token törlése, ha hiba történik
+        navigate('/login'); // Átirányítás a bejelentkezési oldalra
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [userId]);
+  }, [navigate]);
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // A profil mentése történhet itt, pl. localStorage-be vagy JSON-fájl módosításával
-    console.log('Mentett profil:', profile);
+  const handleLogout = () => {
+    localStorage.removeItem('authToken'); // Token törlése
+    navigate('/login'); // Átirányítás a bejelentkezési oldalra
   };
 
   if (loading) return <p>Betöltés...</p>;
@@ -59,74 +69,60 @@ const ProfilePage = () => {
 
   return (
     <div>
-      <h1>Profilom</h1>
+      <h1>Felhasználói profil</h1>
       {profile && (
         <div>
-          <div>
-            <label>Email:</label>
-            <span>{profile.email}</span>
-          </div>
-          <div>
-            <label>Vezetéknév:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                value={profile.lastName}
-                onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-              />
-            ) : (
-              <span>{profile.lastName}</span>
-            )}
-          </div>
-          <div>
-            <label>Keresztnév:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                value={profile.firstName}
-                onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
-              />
-            ) : (
-              <span>{profile.firstName}</span>
-            )}
-          </div>
-          <div>
-            <h3>Szállítási cím</h3>
-            {isEditing ? (
-              <textarea
-                value={JSON.stringify(profile.shippingAddress, null, 2)}
-                onChange={(e) =>
-                  setProfile({
-                    ...profile,
-                    shippingAddress: JSON.parse(e.target.value),
-                  })
-                }
-              />
-            ) : (
-              <pre>{JSON.stringify(profile.shippingAddress, null, 2)}</pre>
-            )}
-          </div>
-          <div>
-            <h3>Számlázási cím</h3>
-            {isEditing ? (
-              <textarea
-                value={JSON.stringify(profile.billingAddress, null, 2)}
-                onChange={(e) =>
-                  setProfile({
-                    ...profile,
-                    billingAddress: JSON.parse(e.target.value),
-                  })
-                }
-              />
-            ) : (
-              <pre>{JSON.stringify(profile.billingAddress, null, 2)}</pre>
-            )}
-          </div>
-          {isEditing ? (
-            <button onClick={handleSave}>Mentés</button>
-          ) : (
-            <button onClick={() => setIsEditing(true)}>Szerkesztés</button>
+          <p>
+            <strong>Email:</strong> {profile.email}
+          </p>
+          <p>
+            <strong>Vezetéknév:</strong> {profile.lastName}
+          </p>
+          <p>
+            <strong>Keresztnév:</strong> {profile.firstName}
+          </p>
+          <h3>Szállítási cím</h3>
+          <p>
+            <strong>Név:</strong> {profile.shippingAddress.name}
+          </p>
+          <p>
+            <strong>Ország:</strong> {profile.shippingAddress.country}
+          </p>
+          <p>
+            <strong>Város:</strong> {profile.shippingAddress.city}
+          </p>
+          <p>
+            <strong>Utca:</strong> {profile.shippingAddress.street}
+          </p>
+          <p>
+            <strong>Irányítószám:</strong> {profile.shippingAddress.zip}
+          </p>
+          <p>
+            <strong>Telefonszám:</strong> {profile.shippingAddress.phoneNumber}
+          </p>
+
+          <h3>Számlázási cím</h3>
+          <p>
+            <strong>Név:</strong> {profile.billingAddress.name}
+          </p>
+          <p>
+            <strong>Ország:</strong> {profile.billingAddress.country}
+          </p>
+          <p>
+            <strong>Város:</strong> {profile.billingAddress.city}
+          </p>
+          <p>
+            <strong>Utca:</strong> {profile.billingAddress.street}
+          </p>
+          <p>
+            <strong>Irányítószám:</strong> {profile.billingAddress.zip}
+          </p>
+          {profile.billingAddress.taxNumber && (
+            <p>
+              <strong>Adószám:</strong> {profile.billingAddress.taxNumber}
+            </p>
           )}
+          <button onClick={handleLogout}>Kilépés</button>
         </div>
       )}
     </div>

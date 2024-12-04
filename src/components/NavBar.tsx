@@ -9,7 +9,6 @@ const NavBar = () => (
     <Link to="/products">Termékek</Link>
     <Link to="/orders">Rendelések</Link>
     <Link to="/order">Megrendelés</Link>
-    <Link to="/users">Felhasználók</Link>
     <Link to="/register">Regisztráció</Link>
     <Link to="/login" >Bejelentkezés</Link>
     <Link to="/profile">Profil</Link>

@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
 import EditProfilePage from "./pages/EditProfilePage";
+import SearchPage from './pages/SearchPage';
 
 const App: React.FC = () => {
   return (
@@ -25,6 +26,7 @@ const App: React.FC = () => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/registracion" element={<RegisterPage />} />
             <Route path="/edit-profile" element={<EditProfilePage />} />
+            <Route path="/search" element={<SearchPage />} />
           </Routes>
         </CartProvider>
       </AuthProvider>

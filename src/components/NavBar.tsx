@@ -14,6 +14,7 @@ const NavBar = () => {
         <Link to="/profile">Profil</Link>
         <Link to="/login">Bejelentkezés</Link>
         <Link to="/registracion">Regisztráció</Link>
+        <Link to="/search">Keresés</Link>
       </div>
     </nav>
   );

@@ -1,39 +1,30 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
+import { AuthProvider } from './context/AuthContext';
+import NavBar from './components/NavBar';
 import ProductListPage from './pages/ProductListPage';
 import CartPage from './pages/CartPage';
-import OrdersPage from './pages/OrdersPage';
-import ProfilePage from './pages/ProfilePage';
+import OrderPage from './pages/OrderPage';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import EditProfilePage from './pages/EditProfilePage';
-import NavBar from './components/NavBar';
-import Footer from './components/Footer';
-import { CartProvider } from './context/CartContext';
+import ProfilePage from './pages/ProfilePage';
 
-const App = () => {
+const App: React.FC = () => {
   return (
-    <CartProvider>
-      <Router>
-        <div className="app-container">
+    <Router>
+      <AuthProvider>
+        <CartProvider>
           <NavBar />
-          <main>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/products/:categoryId" element={<ProductListPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/orders" element={<OrdersPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/edit-profile" element={<EditProfilePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </CartProvider>
+          <Routes>
+            <Route path="/" element={<ProductListPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/order" element={<OrderPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+          </Routes>
+        </CartProvider>
+      </AuthProvider>
+    </Router>
   );
 };
 

@@ -54,6 +54,7 @@ const ProductListPage = () => {
             <h3>{product.name}</h3>
             <img src={product.image} alt={product.name} />
             <p>{product.description}</p>
+            <p>Darab: {product.stock}</p>
             <p>Ár: {product.price} Ft</p>
             <button onClick={() => handleAddToCart(product)}>Kosárba</button>
           </div>

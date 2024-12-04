@@ -1,18 +1,56 @@
-/* src/components/NavBar.css */
+/* NavBar.css */
 .navbar {
-    background-color: #007bff;
-    padding: 10px;
-    display: flex;
-    gap: 10px;
+  background-color: #333;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  font-family: Arial, sans-serif;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  margin: 0 15px;
+  font-size: 16px;
+}
+
+.navbar a:hover {
+  text-decoration: underline;
+}
+
+.navbar-logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.navbar-menu {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-menu a {
+  margin: 0 10px;
+}
+
+.navbar-cart {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-cart span {
+  margin-left: 5px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
   }
-  
-  .navbar a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
+
+  .navbar-menu {
+    margin-top: 10px;
   }
-  
-  .navbar a:hover {
-    text-decoration: underline;
-  }
-  
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useCart } from '../context/CartContext';
 
 interface Address {
   name: string;
@@ -10,14 +11,23 @@ interface Address {
   taxNumber?: string;
 }
 
-interface CartItem {
-  productId: string;
-  name: string;
-  price: number;
-  quantity: number;
+interface Order {
+  id: string;
+  comment: string;
+  billingAddress: Address;
+  shippingAddress: Address;
+  items: {
+    productId: string;
+    name: string;
+    quantity: number;
+    price: number;
+  }[];
+  total: number;
+  createdAt: string;
 }
 
 const OrderPage = () => {
+  const { cart, clearCart } = useCart();
   const [billingAddress, setBillingAddress] = useState<Address>({
     name: '',
     country: '',
@@ -36,25 +46,18 @@ const OrderPage = () => {
     phoneNumber: '',
   });
 
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [comment, setComment] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch cart items from local storage or a JSON file
-    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCart(savedCart);
-
-    // Calculate total price
-    const totalAmount = savedCart.reduce(
-      (acc: number, item: CartItem) => acc + item.price * item.quantity,
+    const totalAmount = cart.reduce(
+      (acc, item) => acc + item.price * item.quantity,
       0
     );
     setTotal(totalAmount);
 
-    // Set mock addresses (this could be fetched from a profile)
     setBillingAddress({
       name: 'John Doe',
       country: 'USA',
@@ -72,9 +75,9 @@ const OrderPage = () => {
       zip: '10001',
       phoneNumber: '+1234567890',
     });
-  }, []);
+  }, [cart]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!termsAccepted) {
       setError('El kell fogadnod a felhasználási feltételeket!');
       return;
@@ -85,32 +88,41 @@ const OrderPage = () => {
       return;
     }
 
+    const newOrder: Order = {
+      id: Date.now().toString(),
+      comment,
+      billingAddress,
+      shippingAddress,
+      items: cart.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      total,
+      createdAt: new Date().toISOString(),
+    };
+
     try {
-      const response = await fetch('/data/orders.json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          comment,
-          billingAddress,
-          shippingAddress,
-          items: cart.map(({ productId, quantity }) => ({ productId, quantity })),
-        }),
-      });
+      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      orders.push(newOrder);
+      localStorage.setItem('orders', JSON.stringify(orders));
 
-      if (!response.ok) throw new Error('Hiba történt a megrendelés leadása során.');
-
-      // Clear cart and redirect to thank-you page
-      localStorage.removeItem('cart');
-      setCart([]);
-      alert('Köszönjük a rendelésedet!');
+      alert('Megrendelés sikeresen leadva!');
+      clearCart();
+      setComment('');
       window.location.href = '/thank-you';
     } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Ismeretlen hiba történt.');
+      console.error('Hiba a megrendelés mentésekor:', err);
+      setError('Nem sikerült menteni a megrendelést.');
     }
   };
 
-  const handleAddressChange = (type: 'billingAddress' | 'shippingAddress', field: keyof Address, value: string) => {
+  const handleAddressChange = (
+    type: 'billingAddress' | 'shippingAddress',
+    field: keyof Address,
+    value: string
+  ) => {
     const updateAddress = type === 'billingAddress' ? setBillingAddress : setShippingAddress;
     updateAddress((prev) => ({ ...prev, [field]: value }));
   };

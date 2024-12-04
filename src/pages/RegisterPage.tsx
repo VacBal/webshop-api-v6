@@ -41,29 +41,25 @@ const RegisterPage = () => {
       return;
     }
   
-    // Adatok mentése
     const newUser = {
       email,
       password,
       firstName,
       lastName,
       shippingAddress,
-      billingAddress: billingAddress || shippingAddress, // Ha nincs számlázási cím, legyen azonos a szállítási címmel
+      billingAddress: billingAddress || shippingAddress,
     };
   
-    // Ellenőrizzük, hogy vannak-e már mentett felhasználók, ha nem, akkor inicializáljuk egy üres tömbbel
-    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    if (!Array.isArray(existingUsers)) {
-      console.error("Hibás 'users' adat a localStorage-ban, alaphelyzetbe állítás...");
-      localStorage.setItem('users', JSON.stringify([]));
-    }
+    // Letöltésre kínáljuk a JSON fájlt
+    const data = new Blob([JSON.stringify(newUser, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(data);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '../data/registered_user.json';
+    link.click();
+    window.URL.revokeObjectURL(url);
   
-    // Frissítsük a felhasználók listáját
-    const updatedUsers = [...(existingUsers || []), newUser];
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-  
-    alert('Sikeres regisztráció!');
-    navigate('/login'); // Átirányítás a bejelentkezési oldalra
+    alert('Sikeres regisztráció! A regisztrációs adatokat JSON fájlba mentettük.');
   };
 
   return (

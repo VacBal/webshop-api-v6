@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import NavBar from '../components/NavBar';
+import '../assets/styles/ProductListPage.css';
 
 interface Product {
   id: string;
@@ -10,11 +9,9 @@ interface Product {
   description: string;
   stock: number;
   image: string;
-  categories: string[];
 }
 
 const ProductListPage = () => {
-  const { categoryId } = useParams<{ categoryId: string }>(); // Kategória ID paraméter
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,13 +20,10 @@ const ProductListPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('/data/products.json'); // Termékek betöltése
+        const response = await fetch('/data/products.json');
         if (!response.ok) throw new Error('Hiba történt a termékek betöltésekor.');
-        const data: Product[] = await response.json();
-        const filteredProducts = data.filter((product) =>
-          product.categories.includes(categoryId!)
-        ); // Csak a kategóriához tartozó termékek
-        setProducts(filteredProducts);
+        const data = await response.json();
+        setProducts(data);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -42,7 +36,7 @@ const ProductListPage = () => {
     };
 
     fetchProducts();
-  }, [categoryId]);
+  }, []);
 
   const handleAddToCart = (product: Product) => {
     addToCart({ productId: product.id, name: product.name, price: product.price, quantity: 1 });
@@ -52,17 +46,15 @@ const ProductListPage = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div>
+    <div className="product-list-container">
       <h1>Terméklista</h1>
-      <div>
+      <div className="product-grid">
         {products.map((product) => (
-          <div key={product.id}>
+          <div key={product.id} className="product-card">
             <h3>{product.name}</h3>
-            <img src={product.image} alt={product.name} style={{ width: '200px' }} />
+            <img src={product.image} alt={product.name} />
             <p>{product.description}</p>
             <p>Ár: {product.price} Ft</p>
-            
-          
             <button onClick={() => handleAddToCart(product)}>Kosárba</button>
           </div>
         ))}

@@ -29,46 +29,36 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Ellenőrizzük, hogy van-e tárolt token
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          throw new Error('Nincs érvényes token.');
-        }
-
         // Helyi `users.json` betöltése és szűrése
         const response = await fetch('/data/users.json');
         if (!response.ok) throw new Error('Hiba történt a felhasználói adatok lekérésekor.');
         const users: UserProfile[] = await response.json();
-        
-        // Példa: Az aktuális felhasználót a token alapján szűrjük
-        const user = users.find((user) => user.userId === token);
-        if (!user) {
-          throw new Error('Felhasználói profil nem található.');
-        }
+
+        // Példa: Az első felhasználó adatait jelenítjük meg
+        const user = users[0];
+        if (!user) throw new Error('Felhasználói profil nem található.');
 
         setProfile(user);
       } catch (err) {
         console.error(err);
-        localStorage.removeItem('authToken'); // Token törlése, ha hiba történik
-        navigate('/login'); // Átirányítás a bejelentkezési oldalra
+        setError('Hiba történt a felhasználói adatok betöltésekor.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [navigate]);
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); // Token törlése
     navigate('/login'); // Átirányítás a bejelentkezési oldalra
   };
 
-  if (loading) return <p>Betöltés...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) return <div className="loading">Betöltés...</div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
-    <div>
+    <div style={{ padding: '20px', maxWidth: '600px', margin: 'auto' }}>
       <h1>Felhasználói profil</h1>
       {profile && (
         <div>
@@ -82,47 +72,35 @@ const ProfilePage = () => {
             <strong>Keresztnév:</strong> {profile.firstName}
           </p>
           <h3>Szállítási cím</h3>
-          <p>
-            <strong>Név:</strong> {profile.shippingAddress.name}
-          </p>
-          <p>
-            <strong>Ország:</strong> {profile.shippingAddress.country}
-          </p>
-          <p>
-            <strong>Város:</strong> {profile.shippingAddress.city}
-          </p>
-          <p>
-            <strong>Utca:</strong> {profile.shippingAddress.street}
-          </p>
-          <p>
-            <strong>Irányítószám:</strong> {profile.shippingAddress.zip}
-          </p>
-          <p>
-            <strong>Telefonszám:</strong> {profile.shippingAddress.phoneNumber}
-          </p>
-
+          <ul>
+            {Object.entries(profile.shippingAddress).map(([key, value]) => (
+              <li key={key}>
+                <strong>{key}:</strong> {value}
+              </li>
+            ))}
+          </ul>
           <h3>Számlázási cím</h3>
-          <p>
-            <strong>Név:</strong> {profile.billingAddress.name}
-          </p>
-          <p>
-            <strong>Ország:</strong> {profile.billingAddress.country}
-          </p>
-          <p>
-            <strong>Város:</strong> {profile.billingAddress.city}
-          </p>
-          <p>
-            <strong>Utca:</strong> {profile.billingAddress.street}
-          </p>
-          <p>
-            <strong>Irányítószám:</strong> {profile.billingAddress.zip}
-          </p>
-          {profile.billingAddress.taxNumber && (
-            <p>
-              <strong>Adószám:</strong> {profile.billingAddress.taxNumber}
-            </p>
-          )}
-          <button onClick={handleLogout}>Kilépés</button>
+          <ul>
+            {Object.entries(profile.billingAddress).map(([key, value]) => (
+              <li key={key}>
+                <strong>{key}:</strong> {value}
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={handleLogout}
+            style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              backgroundColor: 'red',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            Kilépés
+          </button>
         </div>
       )}
     </div>
